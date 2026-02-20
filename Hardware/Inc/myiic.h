@@ -1,0 +1,28 @@
+#ifndef __MYIIC_H
+#define __MYIIC_H
+
+#include "ch32v30x.h"
+
+
+#define MAX30102_IIC_PORT GPIOB
+#define MAX30102_IIC_SCL_PIN GPIO_Pin_6
+#define MAX30102_IIC_SDA_PIN GPIO_Pin_7
+#define MAX30102_IIC_CLK RCC_APB2Periph_GPIOB
+
+#define MAX30102_IIC_SCL_HIGH GPIO_SetBits(MAX30102_IIC_PORT, MAX30102_IIC_SCL_PIN)
+#define MAX30102_IIC_SCL_LOW GPIO_ResetBits(MAX30102_IIC_PORT, MAX30102_IIC_SCL_PIN)
+#define MAX30102_IIC_SDA_HIGH GPIO_SetBits(MAX30102_IIC_PORT, MAX30102_IIC_SDA_PIN)
+#define MAX30102_IIC_SDA_LOW GPIO_ResetBits(MAX30102_IIC_PORT, MAX30102_IIC_SDA_PIN)
+#define MAX30102_READ_SDA GPIO_ReadInputDataBit(MAX30102_IIC_PORT, MAX30102_IIC_SDA_PIN)
+
+void MAX30102_IIC_Init(void);
+void MAX30102_IIC_Start(void);
+void MAX30102_IIC_Stop(void);
+uint8_t MAX30102_IIC_Wait_Ack(void);
+void MAX30102_IIC_Ack(void);
+void MAX30102_IIC_NAck(void);
+void MAX30102_IIC_Send_Byte(uint8_t txd);
+uint8_t MAX30102_IIC_Read_Byte(unsigned char ack);
+void IIC_Delay(void);
+
+#endif
