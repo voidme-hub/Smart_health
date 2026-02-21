@@ -6,7 +6,6 @@
 *
 * Revision History:
 *\n 1-18-2016 Rev 01.00 SK Initial release.
-*\n 2025-12-28 Ported to CH32V203 (Header include update).
 *\n
 *
 * --------------------------------------------------------------------

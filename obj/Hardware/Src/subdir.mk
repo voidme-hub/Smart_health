@@ -7,6 +7,8 @@
 C_SRCS += \
 ../Hardware/Src/B1uart.c \
 ../Hardware/Src/algorithm.c \
+../Hardware/Src/beep.c \
+../Hardware/Src/iwdg.c \
 ../Hardware/Src/key.c \
 ../Hardware/Src/lcd.c \
 ../Hardware/Src/max30102.c \
@@ -14,12 +16,13 @@ C_SRCS += \
 ../Hardware/Src/mq2.c \
 ../Hardware/Src/myiic.c \
 ../Hardware/Src/servo.c \
-../Hardware/Src/sht31.c \
-../Hardware/Src/tim.c 
+../Hardware/Src/sht31.c 
 
 C_DEPS += \
 ./Hardware/Src/B1uart.d \
 ./Hardware/Src/algorithm.d \
+./Hardware/Src/beep.d \
+./Hardware/Src/iwdg.d \
 ./Hardware/Src/key.d \
 ./Hardware/Src/lcd.d \
 ./Hardware/Src/max30102.d \
@@ -27,12 +30,13 @@ C_DEPS += \
 ./Hardware/Src/mq2.d \
 ./Hardware/Src/myiic.d \
 ./Hardware/Src/servo.d \
-./Hardware/Src/sht31.d \
-./Hardware/Src/tim.d 
+./Hardware/Src/sht31.d 
 
 OBJS += \
 ./Hardware/Src/B1uart.o \
 ./Hardware/Src/algorithm.o \
+./Hardware/Src/beep.o \
+./Hardware/Src/iwdg.o \
 ./Hardware/Src/key.o \
 ./Hardware/Src/lcd.o \
 ./Hardware/Src/max30102.o \
@@ -40,8 +44,7 @@ OBJS += \
 ./Hardware/Src/mq2.o \
 ./Hardware/Src/myiic.o \
 ./Hardware/Src/servo.o \
-./Hardware/Src/sht31.o \
-./Hardware/Src/tim.o 
+./Hardware/Src/sht31.o 
 
 DIR_OBJS += \
 ./Hardware/Src/*.o \

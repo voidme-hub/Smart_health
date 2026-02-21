@@ -39,5 +39,7 @@ void Picture_Display (const unsigned char *ptr_pic);
 void LCD_FillRect (unsigned int x, unsigned int y, unsigned int w, unsigned int h, unsigned int color);
 void LCD_DrawChar (unsigned int x, unsigned int y, unsigned int color, unsigned int bg, char c);
 void LCD_DrawString (unsigned int x, unsigned int y, unsigned int color, unsigned int bg, const char *s);
+void LCD_DrawChar32 (unsigned int x, unsigned int y, unsigned int color, unsigned int bg, char c);
+void LCD_DrawString32 (unsigned int x, unsigned int y, unsigned int color, unsigned int bg, const char *s);
 
 #endif

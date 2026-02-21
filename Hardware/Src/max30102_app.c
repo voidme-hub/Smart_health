@@ -14,6 +14,11 @@ MAX30102_Data max30102_data = {
     .brightness = 0                 
 };
 
+static int32_t hr_filtered = 0;
+static int32_t spo2_filtered = 0;
+static uint8_t hr_filtered_valid = 0;
+static uint8_t spo2_filtered_valid = 0;
+
 /********************************** Filter Variables *************************************************/
 
 // Moving Average Buffer
@@ -132,11 +137,48 @@ uint8_t dis_spo2 = 0;
 // Process and Display
 void Process_And_Display_Data(void)
 {
-  if (max30102_data.heart_rate_valid == 1 && max30102_data.heart_rate < 120)
+  if (max30102_data.heart_rate_valid == 1 &&
+      max30102_data.heart_rate >= 40 &&
+      max30102_data.heart_rate <= 180)
+  {
+    if (hr_filtered_valid == 0) {
+      hr_filtered = max30102_data.heart_rate;
+      hr_filtered_valid = 1;
+    } else {
+      hr_filtered = (hr_filtered * 3 + max30102_data.heart_rate) / 4;
+    }
+    max30102_data.heart_rate = hr_filtered;
+    max30102_data.heart_rate_valid = 1;
+  }
+  else
+  {
+    max30102_data.heart_rate_valid = 0;
+  }
+
+  if (max30102_data.spO2_valid == 1 &&
+      max30102_data.spO2 >= 70 &&
+      max30102_data.spO2 <= 100)
+  {
+    if (spo2_filtered_valid == 0) {
+      spo2_filtered = max30102_data.spO2;
+      spo2_filtered_valid = 1;
+    } else {
+      spo2_filtered = (spo2_filtered * 3 + max30102_data.spO2) / 4;
+    }
+    max30102_data.spO2 = spo2_filtered;
+    max30102_data.spO2_valid = 1;
+  }
+  else
+  {
+    max30102_data.spO2_valid = 0;
+  }
+
+  if (max30102_data.heart_rate_valid == 1)
   {
     dis_hr = max30102_data.heart_rate;
+  }
+  if (max30102_data.spO2_valid == 1)
+  {
     dis_spo2 = max30102_data.spO2;
-    printf("dis_hr:%d  ,dis_spo2:%d\r\n",dis_hr,dis_spo2);
   }
 }
-

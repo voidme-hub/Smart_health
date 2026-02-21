@@ -528,6 +528,51 @@ void LCD_DrawString (unsigned int x, unsigned int y, unsigned int color, unsigne
     }
 }
 
+void LCD_DrawChar32 (unsigned int x, unsigned int y, unsigned int color, unsigned int bg, char c)
+{
+    unsigned int row;
+    unsigned int col;
+    const unsigned char *bitmap = LCD_GetCharBitmap(c);
+
+    TFT_SEND_CMD (0x2a);
+    TFT_SEND_DATA (x >> 8);
+    TFT_SEND_DATA (x);
+    TFT_SEND_DATA ((x + 31) >> 8);
+    TFT_SEND_DATA (x + 31);
+
+    TFT_SEND_CMD (0x2b);
+    TFT_SEND_DATA (y >> 8);
+    TFT_SEND_DATA (y);
+    TFT_SEND_DATA ((y + 31) >> 8);
+    TFT_SEND_DATA (y + 31);
+    TFT_SEND_CMD (0x2C);
+
+    for (row = 0; row < 32; row++) {
+        unsigned char line = bitmap[row >> 2];
+        for (col = 0; col < 32; col++) {
+            if (line & (0x80 >> (col >> 2))) {
+                TFT_SEND_DATA (color >> 8);
+                TFT_SEND_DATA (color);
+            } else {
+                TFT_SEND_DATA (bg >> 8);
+                TFT_SEND_DATA (bg);
+            }
+        }
+    }
+}
+
+void LCD_DrawString32 (unsigned int x, unsigned int y, unsigned int color, unsigned int bg, const char *s)
+{
+    unsigned int pos = x;
+    while (*s) {
+        if (pos + 31 >= TFT_COLUMN_NUMBER) {
+            break;
+        }
+        LCD_DrawChar32 (pos, y, color, bg, *s++);
+        pos += 32;
+    }
+}
+
 // void display_char16_16 (unsigned int x, unsigned int y, unsigned long color, unsigned char word_serial_number) {
 //     unsigned int column;
 //     unsigned char tm = 0, temp = 0, xxx = 0;

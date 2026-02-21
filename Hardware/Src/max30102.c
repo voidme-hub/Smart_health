@@ -148,12 +148,12 @@ void MAX30102_Init(void)
     max30102_Bus_Write(REG_FIFO_WR_PTR, 0x00); 
     max30102_Bus_Write(REG_OVF_COUNTER, 0x00); 
     max30102_Bus_Write(REG_FIFO_RD_PTR, 0x00); 
-    max30102_Bus_Write(REG_FIFO_CONFIG, 0x0f); 
+    max30102_Bus_Write(REG_FIFO_CONFIG, 0x2f); 
     max30102_Bus_Write(REG_MODE_CONFIG, 0x03); 
-    max30102_Bus_Write(REG_SPO2_CONFIG, 0x27); 
-    max30102_Bus_Write(REG_LED1_PA, 0x24);	   
-    max30102_Bus_Write(REG_LED2_PA, 0x24);	   
-    max30102_Bus_Write(REG_PILOT_PA, 0x7f);	   
+    max30102_Bus_Write(REG_SPO2_CONFIG, 0x2d); 
+    max30102_Bus_Write(REG_LED1_PA, 0x2a);	   
+    max30102_Bus_Write(REG_LED2_PA, 0x2a);	   
+    max30102_Bus_Write(REG_PILOT_PA, 0x24);	   
     
     printf("MAX30102 Init Complete\r\n");
 }

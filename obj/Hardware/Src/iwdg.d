@@ -1,7 +1,5 @@
-User/main.o: ../User/main.c \
- f:/EVT/CH32V307-FreeRTOS/FreeRTOS/include/FreeRTOS.h \
- f:/EVT/CH32V307-FreeRTOS/User/FreeRTOSConfig.h \
- f:/EVT/CH32V307-FreeRTOS/Debug/debug.h \
+Hardware/Src/iwdg.o: ../Hardware/Src/iwdg.c \
+ f:/EVT/CH32V307-FreeRTOS/Hardware/Inc/iwdg.h \
  f:/EVT/CH32V307-FreeRTOS/Peripheral/inc/ch32v30x.h \
  f:/EVT/CH32V307-FreeRTOS/Core/core_riscv.h \
  f:/EVT/CH32V307-FreeRTOS/User/system_ch32v30x.h \
@@ -29,33 +27,10 @@ User/main.o: ../User/main.c \
  f:/EVT/CH32V307-FreeRTOS/Peripheral/inc/ch32v30x_usart.h \
  f:/EVT/CH32V307-FreeRTOS/Peripheral/inc/ch32v30x_wwdg.h \
  f:/EVT/CH32V307-FreeRTOS/User/ch32v30x_it.h \
- f:/EVT/CH32V307-FreeRTOS/Peripheral/inc/ch32v30x_misc.h \
- f:/EVT/CH32V307-FreeRTOS/FreeRTOS/include/projdefs.h \
- f:/EVT/CH32V307-FreeRTOS/FreeRTOS/include/portable.h \
- f:/EVT/CH32V307-FreeRTOS/FreeRTOS/include/deprecated_definitions.h \
- f:/EVT/CH32V307-FreeRTOS/FreeRTOS/portable/GCC/RISC-V/portmacro.h \
- f:/EVT/CH32V307-FreeRTOS/FreeRTOS/include/mpu_wrappers.h \
- f:/EVT/CH32V307-FreeRTOS/FreeRTOS/include/task.h \
- f:/EVT/CH32V307-FreeRTOS/FreeRTOS/include/list.h \
- f:/EVT/CH32V307-FreeRTOS/FreeRTOS/include/queue.h \
- f:/EVT/CH32V307-FreeRTOS/FreeRTOS/include/task.h ../User/com.h \
- f:/EVT/CH32V307-FreeRTOS/Hardware/Inc/max30102_app.h \
- f:/EVT/CH32V307-FreeRTOS/Hardware/Inc/max30102.h \
- f:/EVT/CH32V307-FreeRTOS/Hardware/Inc/algorithm.h \
- f:/EVT/CH32V307-FreeRTOS/Hardware/Inc/sht31.h \
- f:/EVT/CH32V307-FreeRTOS/Hardware/Inc/B1uart.h \
- f:/EVT/CH32V307-FreeRTOS/Hardware/Inc/lcd.h \
- f:/EVT/CH32V307-FreeRTOS/Hardware/Inc/key.h \
- f:/EVT/CH32V307-FreeRTOS/Hardware/Inc/servo.h \
- f:/EVT/CH32V307-FreeRTOS/Hardware/Inc/mq2.h \
- f:/EVT/CH32V307-FreeRTOS/Hardware/Inc/iwdg.h \
- f:/EVT/CH32V307-FreeRTOS/Hardware/Inc/beep.h
+ f:/EVT/CH32V307-FreeRTOS/Debug/debug.h \
+ f:/EVT/CH32V307-FreeRTOS/Peripheral/inc/ch32v30x_misc.h
 
-f:/EVT/CH32V307-FreeRTOS/FreeRTOS/include/FreeRTOS.h:
-
-f:/EVT/CH32V307-FreeRTOS/User/FreeRTOSConfig.h:
-
-f:/EVT/CH32V307-FreeRTOS/Debug/debug.h:
+f:/EVT/CH32V307-FreeRTOS/Hardware/Inc/iwdg.h:
 
 f:/EVT/CH32V307-FreeRTOS/Peripheral/inc/ch32v30x.h:
 
@@ -111,46 +86,6 @@ f:/EVT/CH32V307-FreeRTOS/Peripheral/inc/ch32v30x_wwdg.h:
 
 f:/EVT/CH32V307-FreeRTOS/User/ch32v30x_it.h:
 
+f:/EVT/CH32V307-FreeRTOS/Debug/debug.h:
+
 f:/EVT/CH32V307-FreeRTOS/Peripheral/inc/ch32v30x_misc.h:
-
-f:/EVT/CH32V307-FreeRTOS/FreeRTOS/include/projdefs.h:
-
-f:/EVT/CH32V307-FreeRTOS/FreeRTOS/include/portable.h:
-
-f:/EVT/CH32V307-FreeRTOS/FreeRTOS/include/deprecated_definitions.h:
-
-f:/EVT/CH32V307-FreeRTOS/FreeRTOS/portable/GCC/RISC-V/portmacro.h:
-
-f:/EVT/CH32V307-FreeRTOS/FreeRTOS/include/mpu_wrappers.h:
-
-f:/EVT/CH32V307-FreeRTOS/FreeRTOS/include/task.h:
-
-f:/EVT/CH32V307-FreeRTOS/FreeRTOS/include/list.h:
-
-f:/EVT/CH32V307-FreeRTOS/FreeRTOS/include/queue.h:
-
-f:/EVT/CH32V307-FreeRTOS/FreeRTOS/include/task.h:
-
-../User/com.h:
-
-f:/EVT/CH32V307-FreeRTOS/Hardware/Inc/max30102_app.h:
-
-f:/EVT/CH32V307-FreeRTOS/Hardware/Inc/max30102.h:
-
-f:/EVT/CH32V307-FreeRTOS/Hardware/Inc/algorithm.h:
-
-f:/EVT/CH32V307-FreeRTOS/Hardware/Inc/sht31.h:
-
-f:/EVT/CH32V307-FreeRTOS/Hardware/Inc/B1uart.h:
-
-f:/EVT/CH32V307-FreeRTOS/Hardware/Inc/lcd.h:
-
-f:/EVT/CH32V307-FreeRTOS/Hardware/Inc/key.h:
-
-f:/EVT/CH32V307-FreeRTOS/Hardware/Inc/servo.h:
-
-f:/EVT/CH32V307-FreeRTOS/Hardware/Inc/mq2.h:
-
-f:/EVT/CH32V307-FreeRTOS/Hardware/Inc/iwdg.h:
-
-f:/EVT/CH32V307-FreeRTOS/Hardware/Inc/beep.h:

@@ -46,7 +46,7 @@ u16 MQ2_ReadData (void) {
     
     Vol = (3.3f / 4095.0f * adc_val);
     
-    // Simple mapping: 0-3.3V -> 0-1000ppm
+    // Simple mapping: 0-3.3V -> 0-100ppm
     Smoke_PPM = (Vol / 3.3f) * 100.0f;
     
 

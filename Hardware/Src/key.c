@@ -18,7 +18,5 @@ void key_init(void)
 
 u8 key_is_pressed(void)
 {   
-    vTaskDelay(1);
     return (GPIO_ReadInputDataBit(KEY_GPIO, KEY_PIN) == Bit_RESET) ? 1u : 0u;
-    vTaskDelay(1);
 }

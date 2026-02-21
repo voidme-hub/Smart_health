@@ -109,30 +109,30 @@ void maxim_heart_rate_and_oxygen_saturation(uint32_t *pun_ir_buffer,  int32_t n_
     int32_t n_y_dc_max_idx, n_x_dc_max_idx; 
     int32_t an_ratio[5],n_ratio_average; 
     int32_t n_nume,  n_denom ;
-    // Æ½¾ùÖµ,ÓÃÓÚÈ¥Ö±Á÷    
+    // remove DC of ir signal    
     un_ir_mean =0; 
     for (k=0 ; k<n_ir_buffer_length ; k++ ) un_ir_mean += pun_ir_buffer[k] ;
     un_ir_mean =un_ir_mean/n_ir_buffer_length ;
     for (k=0 ; k<n_ir_buffer_length ; k++ )  an_x[k] =  pun_ir_buffer[k] - un_ir_mean ; 
     
-    // 4µãÒÆ¶¯Æ½¾ù,ÓÃÓÚÂË²¨
+    // 4 pt Moving Average
     for(k=0; k< BUFFER_SIZE-MA4_SIZE; k++){
         n_denom= ( an_x[k]+an_x[k+1]+ an_x[k+2]+ an_x[k+3]);
         an_x[k]=  n_denom/(int32_t)4; 
     }
 
-    // Ò»½×²î·Ö
+    // get difference of smoothed IR signal
     
     for( k=0; k<BUFFER_SIZE-MA4_SIZE-1;  k++)
         an_dx[k]= (an_x[k+1]- an_x[k]);
 
-    // ²î·ÖºóµÄÖµ×ö2µãÒÆ¶¯Æ½¾ù
+    // 2-pt Moving Average to an_dx
     for(k=0; k< BUFFER_SIZE-MA4_SIZE-2; k++){
         an_dx[k] =  ( an_dx[k]+an_dx[k+1])/2 ;
     }
     
-    // hamming window ¹¹Ôì´°º¯Êı
-    // ²¨ĞÎ·­×ªÕÒ²¨·å²¨¹È
+    // hamming window
+    // flip wave form so that we can detect valley with peak detector
     for ( i=0 ; i<BUFFER_SIZE-HAMMING_SIZE-MA4_SIZE-2 ;i++){
         s= 0;
         for( k=i; k<i+ HAMMING_SIZE ;k++){
@@ -142,29 +142,29 @@ void maxim_heart_rate_and_oxygen_saturation(uint32_t *pun_ir_buffer,  int32_t n_
     }
 
  
-    n_th1=0; // ²¨ĞÎÌáÈ¡ÌØÕ÷µãµÄãĞÖµ
+    n_th1=0; // threshold calculation
     for ( k=0 ; k<BUFFER_SIZE-HAMMING_SIZE ;k++){
         n_th1 += ((an_dx[k]>0)? an_dx[k] : ((int32_t)0-an_dx[k])) ;
     }
     n_th1= n_th1/ ( BUFFER_SIZE-HAMMING_SIZE);
     // peak location is acutally index for sharpest location of raw signal since we flipped the signal         
-    maxim_find_peaks( an_dx_peak_locs, &n_npks, an_dx, BUFFER_SIZE-HAMMING_SIZE, n_th1, 8, 5 );//ÕÒ·åÖµ¸ß¶È,ºÍÏàÁÚ·åÖµ¾àÀë
+    maxim_find_peaks( an_dx_peak_locs, &n_npks, an_dx, BUFFER_SIZE-HAMMING_SIZE, n_th1, 8, 5 );//peak_height, peak_distance, max_num_peaks 
 
     n_peak_interval_sum =0;
     if (n_npks>=2){
         for (k=1; k<n_npks; k++)
             n_peak_interval_sum += (an_dx_peak_locs[k]-an_dx_peak_locs[k -1]);
         n_peak_interval_sum=n_peak_interval_sum/(n_npks-1);
-        *pn_heart_rate=(int32_t)(6000/n_peak_interval_sum);// µÃµ½ĞÄÂÊÖµ
+        *pn_heart_rate=(int32_t)(6000/n_peak_interval_sum);// beats per minutes
         *pch_hr_valid  = 1;
     }
     else  {
         *pn_heart_rate = -999;
         *pch_hr_valid  = 0;
     }
-    //³õÊ¼Êı¾İ²¨¹ÈÎ»ÖÃĞŞÕı        
+            
     for ( k=0 ; k<n_npks ;k++)
-        an_ir_valley_locs[k]=an_dx_peak_locs[k]+HAMMING_SIZE/2; //
+        an_ir_valley_locs[k]=an_dx_peak_locs[k]+HAMMING_SIZE/2; 
 
 
     // raw value : RED(=y) and IR(=X)
@@ -175,7 +175,6 @@ void maxim_heart_rate_and_oxygen_saturation(uint32_t *pun_ir_buffer,  int32_t n_
     }
 
     // find precise min near an_ir_valley_locs
-	//¾«È·µÄ²éÕÒÎ»ÖÃ¼õĞ¡spo2Îó²î
     n_exact_ir_valley_locs_count =0; 
     for(k=0 ; k<n_npks ;k++){
         un_only_once =1;
@@ -194,13 +193,12 @@ void maxim_heart_rate_and_oxygen_saturation(uint32_t *pun_ir_buffer,  int32_t n_
                 n_exact_ir_valley_locs_count ++ ;
         }
     }
-	//²¨¹ÈĞ¡ÓÚ2¸öÎŞ·¨¼ÆËãspo2
     if (n_exact_ir_valley_locs_count <2 ){
        *pn_spo2 =  -999 ; // do not use SPO2 since signal ratio is out of range
        *pch_spo2_valid  = 0; 
        return;
     }
-    // 4 pt MA Æ½¾ù
+    // 4 pt MA
     for(k=0; k< BUFFER_SIZE-MA4_SIZE; k++){
         an_x[k]=( an_x[k]+an_x[k+1]+ an_x[k+2]+ an_x[k+3])/(int32_t)4;
         an_y[k]=( an_y[k]+an_y[k+1]+ an_y[k+2]+ an_y[k+3])/(int32_t)4;
@@ -242,7 +240,7 @@ void maxim_heart_rate_and_oxygen_saturation(uint32_t *pun_ir_buffer,  int32_t n_
             n_denom= ( n_x_ac *n_y_dc_max)>>7;
             if (n_denom>0  && n_i_ratio_count <5 &&  n_nume != 0)
             {   
-                an_ratio[n_i_ratio_count]= (n_nume*100)/n_denom ; //formular is ( n_y_ac *n_x_dc_max) / ( n_x_ac *n_y_dc_max) ;
+                an_ratio[n_i_ratio_count]= (n_nume*20)/n_denom ; //formular is ( n_y_ac *n_x_dc_max) / ( n_x_ac *n_y_dc_max) ;  ///*************************n_numeåŸæ¥æ˜¯*100************************//
                 n_i_ratio_count++;
             }
         }
@@ -258,7 +256,6 @@ void maxim_heart_rate_and_oxygen_saturation(uint32_t *pun_ir_buffer,  int32_t n_
 
     if( n_ratio_average>2 && n_ratio_average <184){
         n_spo2_calc= uch_spo2_table[n_ratio_average] ;
-		if(n_spo2_calc>99) n_spo2_calc=99; //ÑªÑõÖµ
         *pn_spo2 = n_spo2_calc ;
         *pch_spo2_valid  = 1;//  float_SPO2 =  -45.060*n_ratio_average* n_ratio_average/10000 + 30.354 *n_ratio_average/100 + 94.845 ;  // for comparison with table
     }
