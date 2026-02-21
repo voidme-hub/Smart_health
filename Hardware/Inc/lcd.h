@@ -3,7 +3,6 @@
 
 #include "ch32v30x.h"
 
-
 #define RED 0XF800    // ��ɫ
 #define GREEN 0X07E0  // ��ɫ
 #define BLUE 0X001F   // ��ɫ
@@ -37,9 +36,16 @@ void TFT_full (unsigned int color);
 void TFT_clear (void);
 void Picture_Display (const unsigned char *ptr_pic);
 void LCD_FillRect (unsigned int x, unsigned int y, unsigned int w, unsigned int h, unsigned int color);
+void LCD_DrawPoint (unsigned int x, unsigned int y, unsigned int color);
 void LCD_DrawChar (unsigned int x, unsigned int y, unsigned int color, unsigned int bg, char c);
 void LCD_DrawString (unsigned int x, unsigned int y, unsigned int color, unsigned int bg, const char *s);
 void LCD_DrawChar32 (unsigned int x, unsigned int y, unsigned int color, unsigned int bg, char c);
 void LCD_DrawString32 (unsigned int x, unsigned int y, unsigned int color, unsigned int bg, const char *s);
+void LCD_DrawChinese32 (unsigned int x, unsigned int y, unsigned int color, unsigned int bg, unsigned int index);
+void LCD_DrawChar32Transparent (unsigned int x, unsigned int y, unsigned int color, char c);
+void LCD_DrawString32Transparent (unsigned int x, unsigned int y, unsigned int color, const char *s);
+void LCD_DrawChinese32Transparent (unsigned int x, unsigned int y, unsigned int color, unsigned int index);
+void LCD_DrawImageFull (const unsigned char *ptr_pic);
+void LCD_DrawImageRegion (const unsigned char *ptr_pic, unsigned int x, unsigned int y, unsigned int w, unsigned int h);
 
 #endif

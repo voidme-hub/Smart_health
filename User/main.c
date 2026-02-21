@@ -30,6 +30,8 @@
 #include "mq2.h"
 #include "iwdg.h"
 #include "beep.h"
+#include "pic.h"
+
 
 
 /* Global define */
@@ -138,7 +140,7 @@ static void led_task(void *pvParameters) {
 static void beep_task(void *pvParameters) {
 
   while (1) {
-    if (Smoke_PPM > 11.0f) {
+    if (Smoke_PPM > 12.0f) {
       BEEP_ON;
     } else {
       BEEP_OFF;
@@ -177,8 +179,6 @@ static void max30102_task(void *pvParameters) {
   uint8_t part_id = 0;
   uint8_t rev_id = 0;
   int ret = 0;
-  LOG("max30102_task start");
-  vTaskDelay(200);
 
   while (1) {
     long hr;
@@ -214,9 +214,9 @@ static void lcd_task(void *pvParameters){
 	SPI_SCK_0;
 	SPI_BLK_1;
 	TFT_init();
-  TFT_clear();
-	while(1)
-	{
+  LCD_DrawImageFull(gImage_aila);
+  
+	while(1){
 		char line1[10];
 		char line2[10];
 		char line3[10];
@@ -229,41 +229,56 @@ static void lcd_task(void *pvParameters){
 
 		if (lcd_page == 0) {
 			if (bt10 < 0) {
-				snprintf(line1, sizeof(line1), "BT:-%ld.%1ld", (long)(bt_abs / 10), (long)(bt_abs % 10));
+				snprintf(line1, sizeof(line1), ":0%ld.%1ld", (long)(bt_abs / 10), (long)(bt_abs % 10));
 			} else {
-				snprintf(line1, sizeof(line1), "BT:%2ld.%1ld", (long)(bt_abs / 10), (long)(bt_abs % 10));
+				snprintf(line1, sizeof(line1), ":%2ld.%1ld", (long)(bt_abs / 10), (long)(bt_abs % 10));
 			}
 			if (max30102_data.heart_rate_valid) {
-				snprintf(line2, sizeof(line2), "HR:%d", dis_hr);
+				snprintf(line2, sizeof(line2), ":%d", dis_hr);
 			} else {
-				snprintf(line2, sizeof(line2), "HR:---");
+				snprintf(line2, sizeof(line2), ":---");
 			} 
 			if (max30102_data.spO2_valid) {
-				snprintf(line3, sizeof(line3), "S:%d", dis_spo2);
+				snprintf(line3, sizeof(line3), ":%d", dis_spo2);
 			} else {
-				snprintf(line3, sizeof(line3), "S:---");
+				snprintf(line3, sizeof(line3), ":---");
 			}
 		} else {
 			if (t10 < 0) {
-				snprintf(line1, sizeof(line1), "T:-%ld.%1ld", (long)(t_abs / 10), (long)(t_abs % 10));
+				snprintf(line1, sizeof(line1), ":-%ld.%1ld", (long)(t_abs / 10), (long)(t_abs % 10));
 			} else {
-				snprintf(line1, sizeof(line1), "T:%2ld.%1ld", (long)(t_abs / 10), (long)(t_abs % 10));
+				snprintf(line1, sizeof(line1), ":%2ld.%1ld", (long)(t_abs / 10), (long)(t_abs % 10));
 			}
-			snprintf(line2, sizeof(line2), "H:%2ld.%1ld", (long)(h10 / 10), (long)(h10 % 10));
-			snprintf(line3, sizeof(line3), "MQ:%3ld", (long)mq);
+			snprintf(line2, sizeof(line2), ":%2ld.%1ld", (long)(h10 / 10), (long)(h10 % 10));
+			snprintf(line3, sizeof(line3), ":%3ld", (long)mq);
 		}
 
-		LCD_FillRect(0, 0, 240, 96, WHITE);
-		LCD_DrawString32(0, 0, BLUE, WHITE, line1);
-		LCD_DrawString32(0, 32, BLUE, WHITE, line2);
-		LCD_DrawString32(0, 64, BLUE, WHITE, line3);
+		LCD_DrawImageRegion(gImage_aila, 0, 0, 240, 96);
+		if (lcd_page == 0) {
+			LCD_DrawChinese32Transparent(0, 0, RED, 0);
+			LCD_DrawChinese32Transparent(32, 0, RED, 1);
+			LCD_DrawChinese32Transparent(0, 32, RED, 2);
+			LCD_DrawChinese32Transparent(32, 32, RED, 3);
+			LCD_DrawChinese32Transparent(0, 64, RED, 4);
+			LCD_DrawChinese32Transparent(32, 64, RED, 5);
+		} else {
+			LCD_DrawChinese32Transparent(0, 0, RED, 6);
+			LCD_DrawChinese32Transparent(32, 0, RED, 1);
+			LCD_DrawChinese32Transparent(0, 32, RED, 8);
+			LCD_DrawChinese32Transparent(32, 32, RED, 9);
+			LCD_DrawChinese32Transparent(0, 64, RED, 10);
+			LCD_DrawChinese32Transparent(32, 64, RED, 11);
+			LCD_DrawChinese32Transparent(64, 64, RED, 12);
+		}
+		LCD_DrawString32Transparent(80, 0, RED, line1);
+		LCD_DrawString32Transparent(80, 32, RED, line2);
+		LCD_DrawString32Transparent(80, 64, RED, line3);
 		vTaskDelay(pdMS_TO_TICKS(500));
 	}
 }
 
 static void key_task(void *pvParameters) {
   key_init();
-  Servo_Init();
   Servo_SetAngle(0.0f);
   vTaskDelay(20);
   while (1) {
@@ -276,14 +291,14 @@ static void key_task(void *pvParameters) {
 }
 
 static void mq2_task(void *pvParameters) {
-  
+  Servo_Init();
   while(1){
     MQ2_ReadData();
     LOG("MQ2_PPM:%0.2f%%",Smoke_PPM);
-    if (Smoke_PPM > 11.0) {
-      Servo_SetAngle(90.0f);
-    } else {
+    if (Smoke_PPM > 12.0) {
       Servo_SetAngle(0.0f);
+    } else {
+      Servo_SetAngle(90.0f);
     }
     vTaskDelay(500);
   }
