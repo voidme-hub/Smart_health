@@ -8,7 +8,18 @@
 #define MAX30102_INT_CLK RCC_APB2Periph_GPIOB
 #define MAX30102_INT GPIO_ReadInputDataBit(MAX30102_INT_PORT, MAX30102_INT_PIN)
 
-// �Ĵ�����ַ
+/* 硬件 I2C1 接口: PB6(SCL) / PB7(SDA)
+ * CH32V307 上 I2C1 的默认引脚即为 PB6/PB7 (无需重映射)
+ * (与原软件 I2C myiic.h 的引脚一致, 与板上走线匹配) */
+#define MAX30102_I2C            I2C1
+#define MAX30102_I2C_PORT       GPIOB
+#define MAX30102_I2C_SCL_PIN    GPIO_Pin_6
+#define MAX30102_I2C_SDA_PIN    GPIO_Pin_7
+#define MAX30102_I2C_CLK_GPIO   RCC_APB2Periph_GPIOB
+#define MAX30102_I2C_CLK_PERI   RCC_APB1Periph_I2C1
+#define MAX30102_I2C_SPEED      300000  // 400kHz Fast Mode
+
+// 寄存器地址
 #define REG_INTR_STATUS_1    0x00
 #define REG_INTR_STATUS_2    0x01
 #define REG_INTR_ENABLE_1    0x02
@@ -28,7 +39,7 @@
 #define REG_REV_ID           0xFE
 #define REG_PART_ID          0xFF
 
-// ������ַ
+// 器件地址
 #define MAX30102_I2C_ADDR 0xAE
 #define I2C_WR 0x00
 #define I2C_RD 0x01

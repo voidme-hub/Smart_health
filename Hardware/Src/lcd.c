@@ -365,14 +365,27 @@ void SYS_init (unsigned char PLL) {
 void IO_init (void) {
     GPIO_InitTypeDef gpio_init;
 
-    RCC_APB2PeriphClockCmd (RCC_APB2Periph_GPIOC, ENABLE);
+    RCC_APB2PeriphClockCmd (RCC_APB2Periph_GPIOE, ENABLE);
 
-    gpio_init.GPIO_Pin = GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7 | GPIO_Pin_8 | GPIO_Pin_9;
+    gpio_init.GPIO_Pin = LCD_SCK_PIN | LCD_SDA_PIN | LCD_RST_PIN | LCD_DC_PIN | LCD_BLK_PIN;
     gpio_init.GPIO_Mode = GPIO_Mode_Out_PP;
     gpio_init.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init (GPIOC, &gpio_init);
+    GPIO_Init (LCD_GPIO, &gpio_init);
 
-    GPIO_SetBits (GPIOC, GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7 | GPIO_Pin_8 | GPIO_Pin_9);
+    GPIO_SetBits (LCD_GPIO, LCD_SCK_PIN | LCD_SDA_PIN | LCD_RST_PIN | LCD_DC_PIN | LCD_BLK_PIN);
+}
+
+void LCD_GPIOE_Init(void)
+{
+    IO_init();
+    SPI_BLK_1;
+    SPI_RST_0;
+    Delay_ms (1000);
+    SPI_RST_1;
+    Delay_ms (1000);
+    TFT_SEND_CMD (0x11);
+    Delay_ms (120);
+    TFT_SEND_CMD (0x29);
 }
 
 void Delay_us (unsigned int _us_time) {

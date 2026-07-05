@@ -8,16 +8,22 @@
 
 // Init data structure
 MAX30102_Data max30102_data = {
-    .buffer_length = BUFFER_LENGTH, 
-    .min_value = 0x3FFFF,           
-    .max_value = 0,                 
-    .brightness = 0                 
+    .buffer_length = BUFFER_LENGTH,
+    .min_value = 0x3FFFF,
+    .max_value = 0,
+    .brightness = 0,
+    .finger_detected = 0,
+    .finger_stable_count = 0
 };
 
 static int32_t hr_filtered = 0;
 static int32_t spo2_filtered = 0;
 static uint8_t hr_filtered_valid = 0;
 static uint8_t spo2_filtered_valid = 0;
+
+// 滚动缓冲区索引
+static uint16_t buffer_index = 0;
+static uint8_t buffer_filled = 0;
 
 /********************************** Filter Variables *************************************************/
 
@@ -54,14 +60,118 @@ int LowPassFilter(int new_value, int previous_filtered_value)
 
 /********************************** Functions *************************************************/
 
-// Read Data from MAX30102 (Blocking 500 samples)
+// 检测手指是否稳定放置
+// 返回: 1=手指稳定检测到, 0=无手指或不稳定
+uint8_t MAX30102_Check_Finger(void)
+{
+  static uint32_t last_ir = 0;
+  uint32_t current_ir;
+
+  /* 获取当前IR值（最新样本）*/
+  if (buffer_index > 0)
+    current_ir = max30102_data.ir_buffer[buffer_index - 1];
+  else
+    current_ir = max30102_data.ir_buffer[BUFFER_LENGTH - 1];
+
+  /* 检查IR信号是否超过阈值 */
+  if (current_ir > FINGER_THRESHOLD)
+  {
+    /* 检查信号稳定性（变化不超过20%）*/
+    if (last_ir > 0)
+    {
+      uint32_t delta = (current_ir > last_ir) ? (current_ir - last_ir) : (last_ir - current_ir);
+      uint32_t threshold = last_ir / 5;  // 20%变化阈值
+
+      if (delta < threshold)
+      {
+        /* 信号稳定，增加计数 */
+        if (max30102_data.finger_stable_count < FINGER_STABLE_COUNT_MAX)
+          max30102_data.finger_stable_count++;
+
+        /* 达到稳定要求 */
+        if (max30102_data.finger_stable_count >= FINGER_STABLE_COUNT)
+        {
+          max30102_data.finger_detected = 1;
+          last_ir = current_ir;
+          return 1;
+        }
+      }
+      else
+      {
+        /* 信号不稳定，重置计数 */
+        max30102_data.finger_stable_count = 0;
+        max30102_data.finger_detected = 0;
+      }
+    }
+
+    last_ir = current_ir;
+  }
+  else
+  {
+    /* IR信号过低，无手指 */
+    max30102_data.finger_stable_count = 0;
+    max30102_data.finger_detected = 0;
+    last_ir = 0;
+  }
+
+  return 0;
+}
+
+// 读取新样本并添加到滚动缓冲区（非阻塞）
+// 返回: 0=成功添加样本, -1=无新数据, -2=超时
+int MAX30102_Read_Sample(void)
+{
+  uint8_t temp[6];
+  static uint32_t last_timeout = 0;
+
+  /* 检查是否有新数据 */
+  if (MAX30102_INT == 1)
+  {
+    if (++last_timeout > 100)  // 快速超时检测
+    {
+      last_timeout = 0;
+      return -2;
+    }
+    return -1;  // 无新数据
+  }
+
+  last_timeout = 0;
+
+  /* 读取FIFO数据 */
+  max30102_FIFO_ReadBytes(REG_FIFO_DATA, temp);
+
+  /* 提取数据并存入滚动缓冲区 */
+  uint32_t red = (long)((long)((long)temp[0] & 0x03) << 16) | (long)temp[1] << 8 | (long)temp[2];
+  uint32_t ir = (long)((long)((long)temp[3] & 0x03) << 16) | (long)temp[4] << 8 | (long)temp[5];
+
+  max30102_data.red_buffer[buffer_index] = red;
+  max30102_data.ir_buffer[buffer_index] = ir;
+
+  /* 更新最小最大值 */
+  if (max30102_data.min_value > red)
+    max30102_data.min_value = red;
+  if (max30102_data.max_value < red)
+    max30102_data.max_value = red;
+
+  /* 更新索引 */
+  buffer_index++;
+  if (buffer_index >= BUFFER_LENGTH)
+  {
+    buffer_index = 0;
+    buffer_filled = 1;
+  }
+
+  return 0;
+}
+
+// 兼容旧版本的阻塞采集（仅用于初始填充）
 int MAX30102_Read_Data(void)
 {
-  volatile uint32_t un_prev_data = 0;
   uint8_t temp[6];
   int status = 0;
 
-  for (int i = 0; i < max30102_data.buffer_length; i++)
+  /* 快速采集初始数据 */
+  for (int i = 0; i < BUFFER_LENGTH; i++)
   {
     uint32_t timeout = 0;
     while (MAX30102_INT == 1)
@@ -77,6 +187,7 @@ int MAX30102_Read_Data(void)
       return status;
     }
 
+    /* 直接读取FIFO */
     max30102_FIFO_ReadBytes(REG_FIFO_DATA, temp);
 
     max30102_data.red_buffer[i] = (long)((long)((long)temp[0] & 0x03) << 16) | (long)temp[1] << 8 | (long)temp[2];
@@ -88,8 +199,8 @@ int MAX30102_Read_Data(void)
       max30102_data.max_value = max30102_data.red_buffer[i];
   }
 
-  un_prev_data = max30102_data.red_buffer[max30102_data.buffer_length - 1];
-  max30102_data.heart_rate += HEART_RATE_COMPENSATION;
+  buffer_index = 0;
+  buffer_filled = 1;
 
   return 0;
 }
