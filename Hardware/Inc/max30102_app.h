@@ -10,9 +10,24 @@
 #define HEART_RATE_COMPENSATION 0
 
 /* 手指检测阈值和参数 */
-#define FINGER_THRESHOLD 40000      // IR信号阈值，低于此值认为无手指
+#define FINGER_THRESHOLD 10000      // IR信号阈值，低于此值认为无手指
 #define FINGER_STABLE_COUNT 50      // 稳定计数（50样本 = 0.5秒 @ 100Hz）
 #define FINGER_STABLE_COUNT_MAX 100 // 最大稳定计数（1秒）
+
+/* 数据有效性范围 */
+#define HR_MIN 60                   // 心率最小值
+#define HR_MAX 90                  // 心率最大值
+#define SPO2_MIN 95                 // 血氧最小值（不含）
+#define SPO2_MAX 100                // 血氧最大值
+
+/* 测量模式 */
+typedef enum {
+    MEASURE_IDLE,                   // 空闲，等待手指
+    MEASURE_DETECTING,              // 检测手指稳定
+    MEASURE_CALCULATING,            // 计算中
+    MEASURE_DISPLAY,                // 显示结果，等待3秒
+    MEASURE_HOLD                    // 保持显示（手指移开）
+} MeasureState;
 
 typedef struct
 {

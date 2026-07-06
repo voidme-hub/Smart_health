@@ -17,7 +17,7 @@
 #define MAX30102_I2C_SDA_PIN    GPIO_Pin_7
 #define MAX30102_I2C_CLK_GPIO   RCC_APB2Periph_GPIOB
 #define MAX30102_I2C_CLK_PERI   RCC_APB1Periph_I2C1
-#define MAX30102_I2C_SPEED      300000  // 400kHz Fast Mode
+#define MAX30102_I2C_SPEED      400000  // 400kHz Fast Mode
 
 // 寄存器地址
 #define REG_INTR_STATUS_1    0x00
