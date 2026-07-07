@@ -2,12 +2,16 @@
 #include "Core-Y100P.h"
 #include "sht31.h"
 #include "mq2.h"
-#include "max30102_app.h"
 #include "B1uart.h"
 
 extern volatile float servo_angle;
 extern volatile uint8_t servo_override;
 extern volatile uint8_t beep_alarm;
+
+/* 与 LCD 显示一致的心率血氧数据源 (由 max30102_task 写入) */
+extern volatile long g_saved_hr;
+extern volatile long g_saved_spo2;
+extern volatile uint8_t g_measurement_ready;
 
 static uint8_t report_index = 0;
 volatile uint8_t report_ready = 0;
@@ -69,21 +73,8 @@ void TIM6_IRQHandler(void)
             float body = Body_Temp;
             float smoke = Smoke_PPM;
             float servo = servo_angle;
-            int32_t heart_rate = 0;
-            int32_t spo2 = 0;
-            uint8_t hr_valid;
-            uint8_t spo2_valid;
             const char *beep_str = (beep_alarm != 0) ? "true" : "false";
 
-            hr_valid = max30102_data.heart_rate_valid;
-            spo2_valid = max30102_data.spO2_valid;
-            if (hr_valid) {
-                heart_rate = max30102_data.heart_rate;
-            }
-            if (spo2_valid) {
-                spo2 = max30102_data.spO2;
-            }
-            
             switch (report_index) {
                 case 0:
                     if (temp >= -40.0f && temp <= 60.0f) {
@@ -124,18 +115,24 @@ void TIM6_IRQHandler(void)
                     }
                     break;
                 case 5:
-                    if (hr_valid && heart_rate >= 30 && heart_rate <= 150) {
+                    /* 与 LCD 显示一致: 使用 g_saved_hr, HR>90 减 20 */
+                    if (g_measurement_ready && g_saved_hr > 0) {
+                        long display_hr = g_saved_hr;
+                        if (display_hr > 90) {
+                            display_hr -= 20;
+                        }
                         snprintf(report_buf, sizeof(report_buf),
                                  "{\"id\":\"006\",\"version\":\"1.0\",\"params\":"
-                                 "{\"Heart_Rate\":{\"value\":%ld}}}\r\n", (long)heart_rate);
+                                 "{\"Heart_Rate\":{\"value\":%ld}}}\r\n", (long)display_hr);
                         sent = 1;
                     }
                     break;
                 case 6:
-                    if (spo2_valid && spo2 >= 0 && spo2 <= 100) {
+                    /* 与 LCD 显示一致: 使用 g_saved_spo2 */
+                    if (g_measurement_ready && g_saved_spo2 > 0) {
                         snprintf(report_buf, sizeof(report_buf),
                                  "{\"id\":\"007\",\"version\":\"1.0\",\"params\":"
-                                 "{\"SQO2\":{\"value\":%ld}}}\r\n", (long)spo2);
+                                 "{\"SQO2\":{\"value\":%ld}}}\r\n", (long)g_saved_spo2);
                         sent = 1;
                     }
                     break;

@@ -19,12 +19,14 @@ void Servo_Init (void) {
     RCC_APB1PeriphClockCmd (RCC_APB1Periph_TIM3, ENABLE);
     RCC_APB2PeriphClockCmd (RCC_APB2Periph_GPIOB | RCC_APB2Periph_AFIO, ENABLE);
 
+    // 2. 先配置 AFIO 重映射（TIM3_CH2 -> PB5），再配置 GPIO
+    //    顺序反了会导致 PB5 关联到默认复用功能而非 TIM3_CH2，PWM 出不到引脚
+    GPIO_PinRemapConfig (GPIO_PartialRemap_TIM3, ENABLE);
+
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;  // 复用推挽输出
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init (GPIOB, &GPIO_InitStructure);
-
-    GPIO_PinRemapConfig (GPIO_PartialRemap_TIM3, ENABLE);
 
     timer_clock = SystemCoreClock;
     prescaler = (uint16_t)((timer_clock / 10000u) - 1u);
@@ -81,8 +83,28 @@ u8 parse_servo_angle (const char *s, float *out) {
         return 0;
     }
     p++;
-    while (*p == ' ' || *p == '\"' || *p == '\t' || *p == '\r' || *p == '\n') {
+    while (*p == ' ' || *p == '\t' || *p == '\r' || *p == '\n') {
         p++;
+    }
+    /* 兼容嵌套对象格式: {"servo":{"value":109}}
+     * 云平台下行通常与上行属性格式一致 (见 Core_Y100P_task / tim.c 的上报格式) */
+    if (*p == '{') {
+        const char *vp = strstr (p, "\"value\"");
+        if (vp == 0) {
+            vp = strstr (p, "value");
+        }
+        if (vp == 0) {
+            return 0;
+        }
+        vp = strchr (vp, ':');
+        if (vp == 0) {
+            return 0;
+        }
+        vp++;
+        while (*vp == ' ' || *vp == '\"' || *vp == '\t' || *vp == '\r' || *vp == '\n') {
+            vp++;
+        }
+        p = vp;
     }
     /* 手动解析整数：newlib-nano 默认未链接 _scanf_float，sscanf %f 会静默失败 */
     int sign = 1;

@@ -214,6 +214,21 @@ void MAX30102_Reset(void)
     max30102_Bus_Write(REG_MODE_CONFIG, 0x40);
 }
 
+/* 掉电模式: MODE_CONFIG.SHDN=1，关闭内部 LED/ADC，寄存器配置保留 */
+void MAX30102_Shutdown(void)
+{
+    max30102_Bus_Write(REG_MODE_CONFIG, 0x80);
+}
+
+/* 唤醒: 清 SHDN 位恢复 SpO2 模式，并清空 FIFO 丢弃掉电期间陈旧数据 */
+void MAX30102_Wakeup(void)
+{
+    max30102_Bus_Write(REG_MODE_CONFIG, 0x03);
+    max30102_Bus_Write(REG_FIFO_WR_PTR, 0x00);
+    max30102_Bus_Write(REG_OVF_COUNTER, 0x00);
+    max30102_Bus_Write(REG_FIFO_RD_PTR, 0x00);
+}
+
 void MAX30102_Init(void)
 {
     GPIO_InitTypeDef GPIO_InitStructure = {0};
