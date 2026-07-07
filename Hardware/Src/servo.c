@@ -81,11 +81,25 @@ u8 parse_servo_angle (const char *s, float *out) {
         return 0;
     }
     p++;
-    while (*p == ' ' || *p == '\"') {
+    while (*p == ' ' || *p == '\"' || *p == '\t' || *p == '\r' || *p == '\n') {
         p++;
     }
-    if (sscanf (p, "%f", out) == 1) {
-        return 1;
+    /* 手动解析整数：newlib-nano 默认未链接 _scanf_float，sscanf %f 会静默失败 */
+    int sign = 1;
+    if (*p == '-') {
+        sign = -1;
+        p++;
+    } else if (*p == '+') {
+        p++;
     }
-    return 0;
+    if (*p < '0' || *p > '9') {
+        return 0;
+    }
+    int value = 0;
+    while (*p >= '0' && *p <= '9') {
+        value = value * 10 + (*p - '0');
+        p++;
+    }
+    *out = (float)(sign * value);
+    return 1;
 }

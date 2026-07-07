@@ -140,10 +140,10 @@ void TIM6_IRQHandler(void)
                     }
                     break;
                 default:
-                    if (servo >= 0.0f && servo <= 360.0f) {
+                    if (servo >= 0.0f && servo <= 180.0f) {
                         snprintf(report_buf, sizeof(report_buf),
                                  "{\"id\":\"008\",\"version\":\"1.0\",\"params\":"
-                                 "{\"servo\":{\"value\":%.1f}}}\r\n", servo);
+                                 "{\"servo\":{\"value\":%d}}}\r\n", (int)(servo + 0.5f));
                         sent = 1;
                     }
                     break;
