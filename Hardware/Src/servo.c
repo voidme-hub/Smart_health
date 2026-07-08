@@ -83,28 +83,8 @@ u8 parse_servo_angle (const char *s, float *out) {
         return 0;
     }
     p++;
-    while (*p == ' ' || *p == '\t' || *p == '\r' || *p == '\n') {
+    while (*p == ' ' || *p == '\"' || *p == '\t' || *p == '\r' || *p == '\n') {
         p++;
-    }
-    /* 兼容嵌套对象格式: {"servo":{"value":109}}
-     * 云平台下行通常与上行属性格式一致 (见 Core_Y100P_task / tim.c 的上报格式) */
-    if (*p == '{') {
-        const char *vp = strstr (p, "\"value\"");
-        if (vp == 0) {
-            vp = strstr (p, "value");
-        }
-        if (vp == 0) {
-            return 0;
-        }
-        vp = strchr (vp, ':');
-        if (vp == 0) {
-            return 0;
-        }
-        vp++;
-        while (*vp == ' ' || *vp == '\"' || *vp == '\t' || *vp == '\r' || *vp == '\n') {
-            vp++;
-        }
-        p = vp;
     }
     /* 手动解析整数：newlib-nano 默认未链接 _scanf_float，sscanf %f 会静默失败 */
     int sign = 1;

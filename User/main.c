@@ -171,12 +171,12 @@ static void B1uart_task (void *pvParameters) {
 
 static void Core_Y100P_task (void *pvParameters) {
     while (1) {
-        if (uart5_rx.flag == 1) {
-            uart5_rx.flag = 0;
-            LOG ("%s", uart5_rx.data);
+        if (uart6_rx.flag == 1) {
+            uart6_rx.flag = 0;
+            LOG ("%s", uart6_rx.data);
             {
                 float angle = 0.0f;
-                if (parse_servo_angle ((const char *)uart5_rx.data, &angle)) {
+                if (parse_servo_angle ((const char *)uart6_rx.data, &angle)) {
                     if (angle >= 0.0f && angle <= 180.0f) {
                         servo_angle = angle;
                         servo_override = 1;
@@ -186,7 +186,7 @@ static void Core_Y100P_task (void *pvParameters) {
             }
         }
         if (report_ready) {
-            UART5_SendDate ((const uint8_t *)report_buf);
+            UART6_SendString_DMA ((const uint8_t *)report_buf);
             report_ready = 0;
         }
         vTaskDelay (5);
@@ -532,7 +532,7 @@ int main (void) {
     Beep_Init();
     Delay_Init();
     USART_Printf_Init (115200);
-    UART5_Init (115200);
+    UART6_Init (115200);
     TIM6_ReportInit();
     log_init();
     MAX30102_Init();
@@ -547,7 +547,7 @@ int main (void) {
 
     xTaskCreate (create_task, "create_task", TASK1_STK_SIZE, NULL, TASK1_TASK_PRIO,
                  &create_task_Handler);
-    IWDG_Init3min();
+    IWDG_Init();
     vTaskStartScheduler();
     while (1) {
         LOG ("shouldn't run at here!!");

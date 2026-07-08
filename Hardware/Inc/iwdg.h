@@ -3,7 +3,7 @@
 
 #include "ch32v30x.h"
 
-void IWDG_Init3min(void);
+void IWDG_Init(void);
 void IWDG_Feed(void);
 
 #endif

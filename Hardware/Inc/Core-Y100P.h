@@ -3,17 +3,19 @@
 
 #include "ch32v30x.h"
 
-
+#define UART6_RX_DMA_BUF_SIZE  256
+#define UART6_TX_DMA_BUF_SIZE  256
 
 typedef struct {
-    u8 data[256];
+    u8 data[UART6_RX_DMA_BUF_SIZE];
 	u16 len;
 	u8 flag;
-} UART5_RxBuffer;
+} UART6_RxBuffer;
 
-extern UART5_RxBuffer uart5_rx;
+extern UART6_RxBuffer uart6_rx;
 
-void UART5_Init(uint32_t baudrate);
-void UART5_SendDate(const uint8_t *data);
+void UART6_Init(uint32_t baudrate);
+void UART6_SendData_DMA(const uint8_t *data, uint16_t len);
+void UART6_SendString_DMA(const uint8_t *str);
 
 #endif
